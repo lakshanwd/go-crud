@@ -1,47 +1,83 @@
 package main
 
-import "net/http"
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
 
-type student struct {
-	Name    string `json:"name"`
-	Age     int    `json:"age"`
-	Address string `json:"address"`
-}
-
-type book struct {
-	BookName string `json:"bookName"`
-	Author   string `json:"author"`
-}
-
-type studentBook struct {
-	Student *student `json:"student"`
-	Books   *[]book  `json:"books"`
-}
+	"github.com/supunz/go-crud/dao"
+	"github.com/supunz/go-crud/db"
+	"gopkg.in/mgo.v2/bson"
+)
 
 func main() {
+	fmt.Println("handeling routes")
 	http.HandleFunc("/student", handleStudent)
 	http.HandleFunc("/book", handleBook)
 	http.HandleFunc("/studentbook", handleStudentBook)
-	http.ListenAndServe(":8080", nil)
+
+	fmt.Println("server listening on", 8080)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func handleStudent(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		json.NewEncoder(w).Encode(student{})
+	db, err := db.GetDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Session.Close()
+	studentCollection := db.C("student")
+
+	switch r.Method {
+
+	//handle get requests
+	case http.MethodGet:
+		{
+			var result []dao.Student
+			err := studentCollection.Find(nil).All(&result)
+			if err != nil {
+				fmt.Fprint(w, err)
+				return
+			}
+			json.NewEncoder(w).Encode(result)
+		}
+
+	//handle post requests
+	case http.MethodPost:
+		{
+			var student dao.Student
+			json.NewDecoder(r.Body).Decode(student)
+			err := studentCollection.Insert(student)
+			if err != nil {
+				fmt.Fprint(w, err)
+				return
+			}
+
+		}
+
+	//handle delete requests
+	case http.MethodDelete:
+		{
+			err := studentCollection.Remove(bson.M{"Id": r.FormValue("studentId")})
+			if err != nil {
+				fmt.Fprint(w, err)
+				return
+			}
+		}
 	}
 }
 
 func handleBook(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		json.NewEncoder(w).Encode(book{})
+	if r.Method == http.MethodGet {
+		json.NewEncoder(w).Encode(dao.Book{})
 	}
 }
 
 func handleStudentBook(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		student := student{}
-		books := []book{book{}, book{}}
-		json.NewEncoder(w).Encode(studentBook{Student: &student, Books: &books})
+	if r.Method == http.MethodGet {
+		st := dao.Student{}
+		books := []dao.Book{}
+		json.NewEncoder(w).Encode(dao.StudentBook{Student: &st, Books: &books})
 	}
 }
