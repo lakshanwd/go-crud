@@ -7,8 +7,7 @@ import (
 	"net/http"
 
 	"github.com/supunz/go-crud/dao"
-	"github.com/supunz/go-crud/db"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/supunz/go-crud/repository"
 )
 
 func main() {
@@ -22,62 +21,186 @@ func main() {
 }
 
 func handleStudent(w http.ResponseWriter, r *http.Request) {
-	db, err := db.GetDatabase()
+	studentRepo, err := repository.GetStudentRepository()
+	defer studentRepo.Close()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(w, "%s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-	defer db.Session.Close()
-	studentCollection := db.C("student")
 
 	switch r.Method {
 
 	//handle get requests
 	case http.MethodGet:
 		{
-			var result []dao.Student
-			err := studentCollection.Find(nil).All(&result)
+			students, err := studentRepo.Select()
 			if err != nil {
-				fmt.Fprint(w, err)
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			json.NewEncoder(w).Encode(result)
+			json.NewEncoder(w).Encode(students)
 		}
 
-	//handle post requests
+		//handle post requests
 	case http.MethodPost:
 		{
 			var student dao.Student
 			json.NewDecoder(r.Body).Decode(student)
-			err := studentCollection.Insert(student)
+			err := studentRepo.Insert(student)
 			if err != nil {
-				fmt.Fprint(w, err)
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-
+			json.NewEncoder(w).Encode(true)
 		}
 
-	//handle delete requests
+		//handle delete requests
 	case http.MethodDelete:
 		{
-			err := studentCollection.Remove(bson.M{"Id": r.FormValue("studentId")})
+			var student dao.Student
+			json.NewDecoder(r.Body).Decode(student)
+			err := studentRepo.Remove(student)
 			if err != nil {
-				fmt.Fprint(w, err)
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			json.NewEncoder(w).Encode(true)
+		}
+
+		//handle put requests
+	case http.MethodPut:
+		{
+			var student dao.Student
+			json.NewDecoder(r.Body).Decode(student)
+			err := studentRepo.Update(student)
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(true)
 		}
 	}
 }
 
 func handleBook(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		json.NewEncoder(w).Encode(dao.Book{})
+	bookRepo, err := repository.GetBookRepository()
+	defer bookRepo.Close()
+	if err != nil {
+		fmt.Fprintf(w, "%s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		{
+			books, err := bookRepo.Select()
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(books)
+		}
+	case http.MethodPut:
+		{
+			var book dao.Book
+			json.NewDecoder(r.Body).Decode(book)
+			err := bookRepo.Update(book)
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(true)
+		}
+	case http.MethodPost:
+		{
+			var book dao.Book
+			json.NewDecoder(r.Body).Decode(book)
+			err := bookRepo.Insert(book)
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(true)
+		}
+	case http.MethodDelete:
+		{
+			var book dao.Book
+			json.NewDecoder(r.Body).Decode(book)
+			err := bookRepo.Update(book)
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(true)
+		}
 	}
 }
 
 func handleStudentBook(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		st := dao.Student{}
-		books := []dao.Book{}
-		json.NewEncoder(w).Encode(dao.StudentBook{Student: &st, Books: &books})
+	studentBookRepo, err := repository.GetStudentBookRepository()
+	defer studentBookRepo.Close()
+	if err != nil {
+		fmt.Fprintf(w, "%s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		{
+			studentBooks, err := studentBookRepo.Select()
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(studentBooks)
+		}
+	case http.MethodPost:
+		{
+			var studentBook dao.StudentBook
+			json.NewDecoder(r.Body).Decode(studentBook)
+			err := studentBookRepo.Insert(studentBook)
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(true)
+		}
+	case http.MethodPut:
+		{
+			var studentBook dao.StudentBook
+			json.NewDecoder(r.Body).Decode(studentBook)
+			err := studentBookRepo.Update(studentBook)
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(true)
+		}
+	case http.MethodDelete:
+		{
+			var studentBook dao.StudentBook
+			json.NewDecoder(r.Body).Decode(studentBook)
+			err := studentBookRepo.Remove(studentBook)
+			if err != nil {
+				fmt.Fprintf(w, "%s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(true)
+		}
 	}
 }
