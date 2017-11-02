@@ -9,12 +9,13 @@ import (
 //StudentBookRepo - StudentBook repository
 type StudentBookRepo struct {
 	Database *mgo.Database
+	Name     string
 }
 
 //GetStudentBookRepository -sdsf
 func GetStudentBookRepository() (StudentBookRepo, error) {
 	db, err := db.GetDatabase()
-	return StudentBookRepo{Database: db}, err
+	return StudentBookRepo{Database: db, Name: "student_book"}, err
 }
 
 //Select - Select books from db

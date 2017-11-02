@@ -10,17 +10,18 @@ import (
 //StudentRepo - Student repository
 type StudentRepo struct {
 	Database *mgo.Database
+	Name     string
 }
 
 //GetStudentRepository - returns student repository
 func GetStudentRepository() (StudentRepo, error) {
 	db, err := db.GetDatabase()
-	return StudentRepo{Database: db}, err
+	return StudentRepo{Database: db, Name: "student"}, err
 }
 
 //Select - Select students from db
 func (repo StudentRepo) Select() ([]dao.Student, error) {
-	studentCollection := repo.Database.C("student")
+	studentCollection := repo.Database.C(repo.Name)
 	var students []dao.Student
 	err := studentCollection.Find(nil).All(&students)
 	return students, err
@@ -28,7 +29,7 @@ func (repo StudentRepo) Select() ([]dao.Student, error) {
 
 //Insert - Insert Student to db
 func (repo StudentRepo) Insert(student dao.Student) error {
-	studentCollection := repo.Database.C("student")
+	studentCollection := repo.Database.C(repo.Name)
 	return studentCollection.Insert(student)
 }
 
@@ -40,7 +41,7 @@ func (repo StudentRepo) Update(student dao.Student) error {
 
 //Remove - Delete student from db
 func (repo StudentRepo) Remove(student dao.Student) error {
-	studentCollection := repo.Database.C("student")
+	studentCollection := repo.Database.C(repo.Name)
 	return studentCollection.Remove(bson.M{"Id": student.StudentID})
 }
 
