@@ -1,14 +1,14 @@
 package repository
 
 import (
-	"github.com/supunz/go-crud/dao"
+	"database/sql"
+
 	"github.com/supunz/go-crud/db"
-	"gopkg.in/mgo.v2"
 )
 
 //StudentBookRepo - StudentBook repository
 type StudentBookRepo struct {
-	Database *mgo.Database
+	Database *sql.DB
 	Name     string
 }
 
@@ -19,32 +19,30 @@ func GetStudentBookRepository() (StudentBookRepo, error) {
 }
 
 //Select - Select books from db
-func (repo StudentBookRepo) Select() ([]dao.StudentBook, error) {
+func (repo StudentBookRepo) Select() ([]interface{}, error) {
 	//todo - implement here
 	return nil, nil
 }
 
 //Insert - Insert books to db
-func (repo StudentBookRepo) Insert(studentBook dao.StudentBook) error {
+func (repo StudentBookRepo) Insert(doc interface{}) error {
 	//todo - implement here
 	return nil
 }
 
 //Update - Update books
-func (repo StudentBookRepo) Update(studentBook dao.StudentBook) error {
+func (repo StudentBookRepo) Update(doc interface{}) error {
 	//todo - implement here
 	return nil
 }
 
 //Remove - Delete books from db
-func (repo StudentBookRepo) Remove(studentBook dao.StudentBook) error {
+func (repo StudentBookRepo) Remove(doc interface{}) error {
 	//todo - implement here
 	return nil
 }
 
 //Close - close database
 func (repo StudentBookRepo) Close() {
-	if repo.Database != nil && repo.Database.Session != nil {
-		repo.Database.Session.Close()
-	}
+
 }

@@ -1,15 +1,14 @@
 package repository
 
 import (
-	"github.com/supunz/go-crud/dao"
+	"database/sql"
+
 	"github.com/supunz/go-crud/db"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 //StudentRepo - Student repository
 type StudentRepo struct {
-	Database *mgo.Database
+	Database *sql.DB
 	Name     string
 }
 
@@ -20,34 +19,30 @@ func GetStudentRepository() (StudentRepo, error) {
 }
 
 //Select - Select students from db
-func (repo StudentRepo) Select() ([]dao.Student, error) {
-	studentCollection := repo.Database.C(repo.Name)
-	var students []dao.Student
-	err := studentCollection.Find(nil).All(&students)
-	return students, err
+func (repo StudentRepo) Select() ([]interface{}, error) {
+	//to-do implement here
+	return nil, nil
 }
 
 //Insert - Insert Student to db
-func (repo StudentRepo) Insert(student dao.Student) error {
-	studentCollection := repo.Database.C(repo.Name)
-	return studentCollection.Insert(student)
+func (repo StudentRepo) Insert(doc interface{}) error {
+	//to-do implement here
+	return nil
 }
 
 //Update - Update student
-func (repo StudentRepo) Update(student dao.Student) error {
+func (repo StudentRepo) Update(doc interface{}) error {
 	//todo - implement here
 	return nil
 }
 
 //Remove - Delete student from db
-func (repo StudentRepo) Remove(student dao.Student) error {
-	studentCollection := repo.Database.C(repo.Name)
-	return studentCollection.Remove(bson.M{"Id": student.StudentID})
+func (repo StudentRepo) Remove(doc interface{}) error {
+	//to-do implement here
+	return nil
 }
 
 //Close - close database
 func (repo StudentRepo) Close() {
-	if repo.Database != nil && repo.Database.Session != nil {
-		repo.Database.Session.Close()
-	}
+
 }
