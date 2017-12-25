@@ -81,7 +81,7 @@ func BookDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	var book dao.Book
 	json.NewDecoder(r.Body).Decode(book)
-	err = bookRepo.Update(book)
+	err = bookRepo.Remove(book)
 	if err != nil {
 		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
