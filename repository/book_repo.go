@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 
+	"github.com/supunz/go-crud/dao"
 	"github.com/supunz/go-crud/db"
 )
 
@@ -20,8 +21,25 @@ func GetBookRepository() (BookRepo, error) {
 
 //Select - Select books from db
 func (repo BookRepo) Select() ([]interface{}, error) {
-	//to-do implement here
-	return nil, nil
+	rows, err := repo.Database.Query("select book_id, book_name, book_author from tbl_book")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var book dao.Book
+		err = rows.Scan(&book.BookID, &book.BookName, &book.Author)
+		//todo assign book to a list
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return nil, err
 }
 
 //Insert - Insert books to db
