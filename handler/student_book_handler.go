@@ -14,18 +14,19 @@ func StudentBookGetHandler(w http.ResponseWriter, r *http.Request) {
 	studentBookRepo, err := repository.GetStudentBookRepository()
 	defer studentBookRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 
 	studentBooks, err := studentBookRepo.Select()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
-	json.NewEncoder(w).Encode(studentBooks)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(convertListToArray(studentBooks))
 }
 
 //StudentBookPostHandler - handle studentbook post requests
@@ -33,8 +34,8 @@ func StudentBookPostHandler(w http.ResponseWriter, r *http.Request) {
 	studentBookRepo, err := repository.GetStudentBookRepository()
 	defer studentBookRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 
@@ -42,10 +43,11 @@ func StudentBookPostHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(studentBook)
 	err = studentBookRepo.Insert(studentBook)
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(true)
 }
 
@@ -54,8 +56,8 @@ func StudentBookPutHandler(w http.ResponseWriter, r *http.Request) {
 	studentBookRepo, err := repository.GetStudentBookRepository()
 	defer studentBookRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 
@@ -63,10 +65,11 @@ func StudentBookPutHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(studentBook)
 	err = studentBookRepo.Update(studentBook)
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(true)
 }
 
@@ -75,17 +78,17 @@ func StudentBookDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	studentBookRepo, err := repository.GetStudentBookRepository()
 	defer studentBookRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 	var studentBook dao.StudentBook
-	json.NewDecoder(r.Body).Decode(studentBook)
 	err = studentBookRepo.Remove(studentBook)
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(true)
 }

@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/supunz/go-crud/dao"
 	"github.com/supunz/go-crud/repository"
 )
@@ -14,18 +16,19 @@ func StudentPostHandler(w http.ResponseWriter, r *http.Request) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 	var student dao.Student
 	json.NewDecoder(r.Body).Decode(student)
 	err = studentRepo.Insert(student)
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(true)
 }
 
@@ -34,17 +37,18 @@ func StudentGetHandler(w http.ResponseWriter, r *http.Request) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 	students, err := studentRepo.Select()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
-	json.NewEncoder(w).Encode(students)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(convertListToArray(students))
 }
 
 //StudentPutHandler - handle student put request
@@ -52,8 +56,8 @@ func StudentPutHandler(w http.ResponseWriter, r *http.Request) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 
@@ -61,10 +65,11 @@ func StudentPutHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(student)
 	err = studentRepo.Update(student)
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(true)
 }
 
@@ -73,17 +78,18 @@ func StudentDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
 	var student dao.Student
-	json.NewDecoder(r.Body).Decode(student)
+	student.StudentID, _ = strconv.Atoi(mux.Vars(r)["id"])
 	err = studentRepo.Remove(student)
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(true)
 }

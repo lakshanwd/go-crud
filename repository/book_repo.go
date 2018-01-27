@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"container/list"
 	"database/sql"
 
 	"github.com/supunz/go-crud/dao"
@@ -20,17 +21,18 @@ func GetBookRepository() (BookRepo, error) {
 }
 
 //Select - Select books from db
-func (repo BookRepo) Select() ([]interface{}, error) {
+func (repo BookRepo) Select() (*list.List, error) {
 	rows, err := repo.Database.Query("select book_id, book_name, book_author from tbl_book")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	books := list.New()
 	for rows.Next() {
 		var book dao.Book
 		err = rows.Scan(&book.BookID, &book.BookName, &book.Author)
-		//todo assign book to a list
+		books.PushBack(book)
 		if err != nil {
 			return nil, err
 		}
@@ -39,28 +41,43 @@ func (repo BookRepo) Select() ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, err
+	return books, err
 }
 
 //Insert - Insert books to db
 func (repo BookRepo) Insert(doc interface{}) error {
-	//to-do implement here
-	return nil
+	book := doc.(dao.Book)
+	stmt, err := repo.Database.Prepare("insert into tbl_book(book_name, book_author) values (?,?)")
+	if err != nil {
+		return nil
+	}
+	_, err = stmt.Exec(book.BookName, book.Author)
+	return err
 }
 
 //Update - Update books
 func (repo BookRepo) Update(doc interface{}) error {
-	//to-do implement here
-	return nil
+	book := doc.(dao.Book)
+	stmt, err := repo.Database.Prepare("update tbl_book set book_name=?, book_author=? where book_id=?")
+	if err != nil {
+		return nil
+	}
+	_, err = stmt.Exec(book.BookName, book.Author, book.BookID)
+	return err
 }
 
 //Remove - Delete books from db
 func (repo BookRepo) Remove(doc interface{}) error {
-	//to-do implement here
-	return nil
+	book := doc.(dao.Book)
+	stmt, err := repo.Database.Prepare("delete from tbl_book where book_id=?")
+	if err != nil {
+		return nil
+	}
+	_, err = stmt.Exec(book.BookID)
+	return err
 }
 
 //Close - close database
 func (repo BookRepo) Close() {
-
+	repo.Database.Close()
 }

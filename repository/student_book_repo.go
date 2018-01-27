@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"container/list"
 	"database/sql"
 
 	"github.com/supunz/go-crud/db"
@@ -19,7 +20,7 @@ func GetStudentBookRepository() (StudentBookRepo, error) {
 }
 
 //Select - Select books from db
-func (repo StudentBookRepo) Select() ([]interface{}, error) {
+func (repo StudentBookRepo) Select() (*list.List, error) {
 	//todo implement here
 	return nil, nil
 }
@@ -44,5 +45,5 @@ func (repo StudentBookRepo) Remove(doc interface{}) error {
 
 //Close - close database
 func (repo StudentBookRepo) Close() {
-
+	repo.Database.Close()
 }
