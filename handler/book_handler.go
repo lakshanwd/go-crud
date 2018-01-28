@@ -1,96 +1,88 @@
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/supunz/go-crud/dao"
 	"github.com/supunz/go-crud/repository"
 )
 
 //BookGetHandler - handle book get requests
-func BookGetHandler(w http.ResponseWriter, r *http.Request) {
+func BookGetHandler(c *gin.Context) {
 	bookRepo, err := repository.GetBookRepository()
 	defer bookRepo.Close()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 	books, err := bookRepo.Select()
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(convertListToArray(books))
+	c.JSON(http.StatusOK, convertListToArray(books))
 }
 
 //BookPostHandler - handle book post requests
-func BookPostHandler(w http.ResponseWriter, r *http.Request) {
+func BookPostHandler(c *gin.Context) {
 	bookRepo, err := repository.GetBookRepository()
 	defer bookRepo.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
 	var book dao.Book
-	json.NewDecoder(r.Body).Decode(&book)
-	err = bookRepo.Insert(book)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
-		return
+	if err = c.ShouldBindJSON(&book); err == nil {
+		err = bookRepo.Insert(book)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, true)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(true)
 }
 
 //BookPutHandler - handle book put requests
-func BookPutHandler(w http.ResponseWriter, r *http.Request) {
+func BookPutHandler(c *gin.Context) {
 	bookRepo, err := repository.GetBookRepository()
 	defer bookRepo.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 	var book dao.Book
-	json.NewDecoder(r.Body).Decode(&book)
-	err = bookRepo.Update(book)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
-		return
+	if err = c.ShouldBindJSON(&book); err == nil {
+		err = bookRepo.Update(book)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, true)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(true)
 }
 
 //BookDeleteHandler - handle book delete requests
-func BookDeleteHandler(w http.ResponseWriter, r *http.Request) {
+func BookDeleteHandler(c *gin.Context) {
 	bookRepo, err := repository.GetBookRepository()
 	defer bookRepo.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
 	var book dao.Book
-	book.BookID, _ = strconv.Atoi(mux.Vars(r)["id"])
+	book.BookID, _ = strconv.Atoi(c.Param("id"))
 	err = bookRepo.Remove(book)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(true)
+	c.JSON(http.StatusOK, true)
 }

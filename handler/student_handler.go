@@ -1,95 +1,87 @@
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/supunz/go-crud/dao"
 	"github.com/supunz/go-crud/repository"
 )
 
 //StudentPostHandler - handle student post request
-func StudentPostHandler(w http.ResponseWriter, r *http.Request) {
+func StudentPostHandler(c *gin.Context) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 	var student dao.Student
-	json.NewDecoder(r.Body).Decode(student)
-	err = studentRepo.Insert(student)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
-		return
+	if err = c.ShouldBindJSON(&student); err == nil {
+		err = studentRepo.Insert(student)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, true)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(true)
 }
 
 //StudentGetHandler - handle student get request
-func StudentGetHandler(w http.ResponseWriter, r *http.Request) {
+func StudentGetHandler(c *gin.Context) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 	students, err := studentRepo.Select()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(convertListToArray(students))
+	c.JSON(http.StatusOK, convertListToArray(students))
 }
 
 //StudentPutHandler - handle student put request
-func StudentPutHandler(w http.ResponseWriter, r *http.Request) {
+func StudentPutHandler(c *gin.Context) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
 	var student dao.Student
-	json.NewDecoder(r.Body).Decode(student)
-	err = studentRepo.Update(student)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
-		return
+	if err = c.ShouldBindJSON(&student); err == nil {
+		err = studentRepo.Update(student)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, true)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(true)
 }
 
 //StudentDeleteHandler - handle student delete request
-func StudentDeleteHandler(w http.ResponseWriter, r *http.Request) {
+func StudentDeleteHandler(c *gin.Context) {
 	studentRepo, err := repository.GetStudentRepository()
 	defer studentRepo.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 	var student dao.Student
-	student.StudentID, _ = strconv.Atoi(mux.Vars(r)["id"])
+	student.StudentID, _ = strconv.Atoi(c.Param("id"))
 	err = studentRepo.Remove(student)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(true)
+	c.JSON(http.StatusOK, true)
 }
