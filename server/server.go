@@ -23,11 +23,6 @@ func main() {
 	router.Methods(http.MethodPut).Path("/book").HandlerFunc(handler.BookPutHandler)
 	router.Methods(http.MethodDelete).Path("/book/{id:[0-9]+}").HandlerFunc(handler.BookDeleteHandler)
 
-	router.Methods(http.MethodGet).Path("/studentbook").HandlerFunc(handler.StudentBookGetHandler)
-	router.Methods(http.MethodPost).Path("/studentbook").HandlerFunc(handler.StudentBookPostHandler)
-	router.Methods(http.MethodPut).Path("/studentbook").HandlerFunc(handler.StudentBookPutHandler)
-	router.Methods(http.MethodDelete).Path("/studentbook/{id:[0-9]+}").HandlerFunc(handler.StudentBookDeleteHandler)
-
 	fmt.Println("server listening on", 8080)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
