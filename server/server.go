@@ -2,27 +2,26 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
 	"github.com/supunz/go-crud/handler"
 )
 
 func main() {
 	fmt.Println("handeling routes")
-	router := mux.NewRouter().StrictSlash(true)
+	router := gin.Default()
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
 
-	router.Methods(http.MethodGet).Path("/student").HandlerFunc(handler.StudentGetHandler)
-	router.Methods(http.MethodPost).Path("/student").HandlerFunc(handler.StudentPostHandler)
-	router.Methods(http.MethodPut).Path("/student").HandlerFunc(handler.StudentPutHandler)
-	router.Methods(http.MethodDelete).Path("/student/{id:[0-9]+}").HandlerFunc(handler.StudentDeleteHandler)
+	router.GET("/book", handler.BookGetHandler)
+	router.POST("/book", handler.BookPostHandler)
+	router.PUT("/book", handler.BookPutHandler)
+	router.DELETE("/book/:id", handler.BookDeleteHandler)
 
-	router.Methods(http.MethodGet).Path("/book").HandlerFunc(handler.BookGetHandler)
-	router.Methods(http.MethodPost).Path("/book").HandlerFunc(handler.BookPostHandler)
-	router.Methods(http.MethodPut).Path("/book").HandlerFunc(handler.BookPutHandler)
-	router.Methods(http.MethodDelete).Path("/book/{id:[0-9]+}").HandlerFunc(handler.BookDeleteHandler)
+	router.GET("/student", handler.StudentGetHandler)
+	router.POST("/student", handler.StudentPostHandler)
+	router.PUT("/student", handler.StudentPutHandler)
+	router.DELETE("/student/:id", handler.StudentDeleteHandler)
 
-	fmt.Println("server listening on", 8080)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	router.Run(":8080")
 }
