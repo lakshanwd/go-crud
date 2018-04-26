@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"../dao"
+	"../repository"
 	"github.com/gin-gonic/gin"
-	"github.com/supunz/go-crud/dao"
-	"github.com/supunz/go-crud/repository"
 )
 
 //BookGetHandler - handle book get requests
