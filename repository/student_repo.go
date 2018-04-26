@@ -4,8 +4,8 @@ import (
 	"container/list"
 	"database/sql"
 
-	"github.com/supunz/go-crud/dao"
-	"github.com/supunz/go-crud/db"
+	"../dao"
+	"../db"
 )
 
 //StudentRepo - Student repository
