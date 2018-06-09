@@ -8,5 +8,4 @@ type Repo interface {
 	Insert(doc interface{}) error
 	Update(doc interface{}) error
 	Remove(doc interface{}) error
-	Close(repo interface{})
 }

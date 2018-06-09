@@ -2,7 +2,6 @@ package repository
 
 import (
 	"container/list"
-	"database/sql"
 
 	"../dao"
 	"../db"
@@ -10,19 +9,22 @@ import (
 
 //StudentRepo - Student repository
 type StudentRepo struct {
-	Database *sql.DB
-	Name     string
+	Name string
 }
 
 //GetStudentRepository - returns student repository
-func GetStudentRepository() (StudentRepo, error) {
-	db, err := db.GetDatabase()
-	return StudentRepo{Database: db, Name: "student"}, err
+func GetStudentRepository() StudentRepo {
+	return StudentRepo{Name: "student"}
 }
 
 //Select - Select students from db
 func (repo StudentRepo) Select() (*list.List, error) {
-	rows, err := repo.Database.Query("select student_id, student_name, student_age, street_address, street_address_2, city, state, zip_code, country from tbl_student")
+	db, err := db.GetDatabase()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+	rows, err := db.Query("select student_id, student_name, student_age, street_address, street_address_2, city, state, zip_code, country from tbl_student")
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +50,14 @@ func (repo StudentRepo) Select() (*list.List, error) {
 
 //Insert - Insert Student to db
 func (repo StudentRepo) Insert(doc interface{}) error {
+	db, err := db.GetDatabase()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 	student := doc.(dao.Student)
-	stmt, err := repo.Database.Prepare("insert into tbl_student (student_name, student_age, street_address, street_address_2, city, state, zip_code, country) values (?,?,?,?,?,?,?,?)")
+	stmt, err := db.Prepare("insert into tbl_student (student_name, student_age, street_address, street_address_2, city, state, zip_code, country) values (?,?,?,?,?,?,?,?)")
+	defer stmt.Close()
 	if err != nil {
 		return nil
 	}
@@ -60,8 +68,14 @@ func (repo StudentRepo) Insert(doc interface{}) error {
 
 //Update - Update student
 func (repo StudentRepo) Update(doc interface{}) error {
+	db, err := db.GetDatabase()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 	student := doc.(dao.Student)
-	stmt, err := repo.Database.Prepare("update tbl_student set student_name=?, student_age=?, street_address=?, street_address_2=?, city=?, state=?, zip_code=?, country=? where student_id=?")
+	stmt, err := db.Prepare("update tbl_student set student_name=?, student_age=?, street_address=?, street_address_2=?, city=?, state=?, zip_code=?, country=? where student_id=?")
+	defer stmt.Close()
 	if err != nil {
 		return nil
 	}
@@ -72,16 +86,17 @@ func (repo StudentRepo) Update(doc interface{}) error {
 
 //Remove - Delete student from db
 func (repo StudentRepo) Remove(doc interface{}) error {
+	db, err := db.GetDatabase()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 	student := doc.(dao.Student)
-	stmt, err := repo.Database.Prepare("delete from tbl_student where student_id=?")
+	stmt, err := db.Prepare("delete from tbl_student where student_id=?")
+	defer stmt.Close()
 	if err != nil {
 		return nil
 	}
 	_, err = stmt.Exec(student.StudentID)
 	return err
-}
-
-//Close - close database
-func (repo StudentRepo) Close() {
-	repo.Database.Close()
 }

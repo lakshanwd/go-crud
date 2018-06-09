@@ -11,15 +11,10 @@ import (
 
 //BookGetHandler - handle book get requests
 func BookGetHandler(c *gin.Context) {
-	bookRepo, err := repository.GetBookRepository()
-	defer bookRepo.Close()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
+	bookRepo := repository.GetBookRepository()
 	books, err := bookRepo.Select()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, convertListToArray(books))
@@ -27,61 +22,45 @@ func BookGetHandler(c *gin.Context) {
 
 //BookPostHandler - handle book post requests
 func BookPostHandler(c *gin.Context) {
-	bookRepo, err := repository.GetBookRepository()
-	defer bookRepo.Close()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
+	bookRepo := repository.GetBookRepository()
 
 	var book dao.Book
-	if err = c.ShouldBindJSON(&book); err == nil {
+	if err := c.ShouldBindJSON(&book); err == nil {
 		err = bookRepo.Insert(book)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 		c.JSON(http.StatusOK, true)
 	} else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, err.Error())
 	}
 }
 
 //BookPutHandler - handle book put requests
 func BookPutHandler(c *gin.Context) {
-	bookRepo, err := repository.GetBookRepository()
-	defer bookRepo.Close()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
+	bookRepo := repository.GetBookRepository()
 	var book dao.Book
-	if err = c.ShouldBindJSON(&book); err == nil {
+	if err := c.ShouldBindJSON(&book); err == nil {
 		err = bookRepo.Update(book)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 		c.JSON(http.StatusOK, true)
 	} else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, err.Error())
 	}
 }
 
 //BookDeleteHandler - handle book delete requests
 func BookDeleteHandler(c *gin.Context) {
-	bookRepo, err := repository.GetBookRepository()
-	defer bookRepo.Close()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
-
+	bookRepo := repository.GetBookRepository()
 	var book dao.Book
 	book.BookID, _ = strconv.Atoi(c.Param("id"))
-	err = bookRepo.Remove(book)
+	err := bookRepo.Remove(book)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, true)
