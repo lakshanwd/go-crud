@@ -58,7 +58,7 @@ func (repo BookRepo) Insert(doc interface{}) error {
 	book := doc.(dao.Book)
 	stmt, err := db.Prepare("insert into tbl_book(book_name, book_author) values (?,?)")
 	if err != nil {
-		return nil
+		return err
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(book.BookName, book.Author)
@@ -76,7 +76,7 @@ func (repo BookRepo) Update(doc interface{}) error {
 	stmt, err := db.Prepare("update tbl_book set book_name=?, book_author=? where book_id=?")
 	defer stmt.Close()
 	if err != nil {
-		return nil
+		return err
 	}
 	_, err = stmt.Exec(book.BookName, book.Author, book.BookID)
 	return err
@@ -93,7 +93,7 @@ func (repo BookRepo) Remove(doc interface{}) error {
 	stmt, err := db.Prepare("delete from tbl_book where book_id=?")
 	defer stmt.Close()
 	if err != nil {
-		return nil
+		return err
 	}
 	_, err = stmt.Exec(book.BookID)
 	return err

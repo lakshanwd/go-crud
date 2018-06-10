@@ -59,7 +59,7 @@ func (repo StudentRepo) Insert(doc interface{}) error {
 	stmt, err := db.Prepare("insert into tbl_student (student_name, student_age, street_address, street_address_2, city, state, zip_code, country) values (?,?,?,?,?,?,?,?)")
 	defer stmt.Close()
 	if err != nil {
-		return nil
+		return err
 	}
 	address := student.Address
 	_, err = stmt.Exec(student.Name, student.Age, address.StreetAddress, address.StreetAddress2, address.City, address.State, address.ZipCode, address.Country)
@@ -77,7 +77,7 @@ func (repo StudentRepo) Update(doc interface{}) error {
 	stmt, err := db.Prepare("update tbl_student set student_name=?, student_age=?, street_address=?, street_address_2=?, city=?, state=?, zip_code=?, country=? where student_id=?")
 	defer stmt.Close()
 	if err != nil {
-		return nil
+		return err
 	}
 	address := student.Address
 	_, err = stmt.Exec(student.Name, student.Age, address.StreetAddress, address.StreetAddress2, address.City, address.State, address.ZipCode, address.Country, student.StudentID)
@@ -95,7 +95,7 @@ func (repo StudentRepo) Remove(doc interface{}) error {
 	stmt, err := db.Prepare("delete from tbl_student where student_id=?")
 	defer stmt.Close()
 	if err != nil {
-		return nil
+		return err
 	}
 	_, err = stmt.Exec(student.StudentID)
 	return err
