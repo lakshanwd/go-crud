@@ -2,7 +2,7 @@ package repository
 
 import (
 	"container/list"
-	"log"
+	"database/sql"
 
 	"../dao"
 	"../db"
@@ -25,76 +25,48 @@ func (repo BookRepo) Select() (*list.List, error) {
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query("select book_id, book_name, book_author from tbl_book")
-	if err != nil {
-		log.Printf("%v", err)
-		return nil, err
-	}
-	defer rows.Close()
 
-	books := list.New()
-	for rows.Next() {
+	reader := func(rows *sql.Rows, collection *list.List) error {
 		var book dao.Book
 		err = rows.Scan(&book.BookID, &book.BookName, &book.Author)
-		books.PushBack(book)
-		if err != nil {
-			return nil, err
-		}
+		collection.PushBack(book)
+		return err
 	}
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-	return books, err
+
+	return executeReader(db, "select book_id, book_name, book_author from tbl_book", reader)
 }
 
 //Insert - Insert books to db
-func (repo BookRepo) Insert(doc interface{}) error {
+func (repo BookRepo) Insert(doc interface{}) (int64, error) {
 	db, err := db.GetDatabase()
 	if err != nil {
-		return err
+		return -1, err
 	}
 	defer db.Close()
 	book := doc.(dao.Book)
-	stmt, err := db.Prepare("insert into tbl_book(book_name, book_author) values (?,?)")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-	_, err = stmt.Exec(book.BookName, book.Author)
-	return err
+	return executeInsert(db, "insert into tbl_book(book_name, book_author) values (?,?)", book.BookName, book.Author)
 }
 
 //Update - Update books
-func (repo BookRepo) Update(doc interface{}) error {
-	book := doc.(dao.Book)
+func (repo BookRepo) Update(doc interface{}) (int64, error) {
 	db, err := db.GetDatabase()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer db.Close()
-	stmt, err := db.Prepare("update tbl_book set book_name=?, book_author=? where book_id=?")
-	defer stmt.Close()
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(book.BookName, book.Author, book.BookID)
-	return err
+	book := doc.(dao.Book)
+
+	return executeUpdateDelete(db, "update tbl_book set book_name=?, book_author=? where book_id=?", book.BookName, book.Author, book.BookID)
 }
 
 //Remove - Delete books from db
-func (repo BookRepo) Remove(doc interface{}) error {
+func (repo BookRepo) Remove(doc interface{}) (int64, error) {
 	book := doc.(dao.Book)
 	db, err := db.GetDatabase()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer db.Close()
-	stmt, err := db.Prepare("delete from tbl_book where book_id=?")
-	defer stmt.Close()
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(book.BookID)
-	return err
+
+	return executeUpdateDelete(db, "delete from tbl_book where book_id=?", book.BookID)
 }

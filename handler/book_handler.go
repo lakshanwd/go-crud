@@ -26,7 +26,7 @@ func BookPostHandler(c *gin.Context) {
 
 	var book dao.Book
 	if err := c.ShouldBindJSON(&book); err == nil {
-		err = bookRepo.Insert(book)
+		_, err = bookRepo.Insert(book)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return
@@ -42,7 +42,7 @@ func BookPutHandler(c *gin.Context) {
 	bookRepo := repository.GetBookRepository()
 	var book dao.Book
 	if err := c.ShouldBindJSON(&book); err == nil {
-		err = bookRepo.Update(book)
+		_, err = bookRepo.Update(book)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return
@@ -58,7 +58,7 @@ func BookDeleteHandler(c *gin.Context) {
 	bookRepo := repository.GetBookRepository()
 	var book dao.Book
 	book.BookID, _ = strconv.Atoi(c.Param("id"))
-	err := bookRepo.Remove(book)
+	_, err := bookRepo.Remove(book)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

@@ -14,7 +14,7 @@ func StudentPostHandler(c *gin.Context) {
 	studentRepo := repository.GetStudentRepository()
 	var student dao.Student
 	if err := c.ShouldBindJSON(&student); err == nil {
-		err = studentRepo.Insert(student)
+		_, err = studentRepo.Insert(student)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return
@@ -41,7 +41,7 @@ func StudentPutHandler(c *gin.Context) {
 	studentRepo := repository.GetStudentRepository()
 	var student dao.Student
 	if err := c.ShouldBindJSON(&student); err == nil {
-		err = studentRepo.Update(student)
+		_, err = studentRepo.Update(student)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return
@@ -57,7 +57,7 @@ func StudentDeleteHandler(c *gin.Context) {
 	studentRepo := repository.GetStudentRepository()
 	var student dao.Student
 	student.StudentID, _ = strconv.Atoi(c.Param("id"))
-	err := studentRepo.Remove(student)
+	_, err := studentRepo.Remove(student)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
