@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"../dao"
-	"../repository"
 	"github.com/gin-gonic/gin"
+	"github.com/lakshanwd/go-crud/dao"
+	"github.com/lakshanwd/go-crud/repository"
 )
 
 //StudentPostHandler - handle student post request

@@ -4,8 +4,8 @@ import (
 	"container/list"
 	"database/sql"
 
-	"../dao"
-	"../db"
+	"github.com/lakshanwd/go-crud/dao"
+	"github.com/lakshanwd/go-crud/db"
 )
 
 //BookRepo - Book repository

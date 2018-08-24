@@ -3,8 +3,8 @@ package repository
 import (
 	"container/list"
 
-	"../dao"
-	"../db"
+	"github.com/lakshanwd/go-crud/dao"
+	"github.com/lakshanwd/go-crud/db"
 )
 
 //StudentRepo - Student repository

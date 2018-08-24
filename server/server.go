@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"../handler"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/lakshanwd/go-crud/handler"
 )
 
 func main() {
