@@ -3,13 +3,19 @@ package main
 import (
 	"fmt"
 
+	"github.com/lakshanwd/muve-go/go-crud/repo"
+
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/lakshanwd/go-crud/handler"
 )
 
 func main() {
-	fmt.Println("handeling routes")
+	fmt.Println("setup database connections")
+	repo.SetupRepo()
+	defer repo.CloseRepo()
+
+	fmt.Println("handling roures")
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 
