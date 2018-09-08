@@ -19,8 +19,9 @@ type Repo interface {
 var DbConnection *sql.DB
 
 //SetupRepo - setup database connections
-func SetupRepo() {
-	DbConnection, _ = db.GetDatabase()
+func SetupRepo() (err error) {
+	DbConnection, err = db.GetDatabase()
+	return
 }
 
 //CloseRepo - close database connections

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/lakshanwd/muve-go/go-crud/repo"
 
@@ -12,7 +13,9 @@ import (
 
 func main() {
 	fmt.Println("setup database connections")
-	repo.SetupRepo()
+	if err := repo.SetupRepo(); err != nil {
+		log.Fatal(err)
+	}
 	defer repo.CloseRepo()
 
 	fmt.Println("handling roures")
