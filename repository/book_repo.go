@@ -3,7 +3,9 @@ package repository
 import (
 	"container/list"
 	"database/sql"
+	"log"
 
+	util "github.com/lakshanwd/db-helper/mysql"
 	"github.com/lakshanwd/go-crud/dao"
 )
 
@@ -19,29 +21,29 @@ func GetBookRepository() BookRepo {
 
 //Select - Select books from db
 func (repo BookRepo) Select() (*list.List, error) {
-	reader := func(rows *sql.Rows, collection *list.List) error {
+	reader := func(rows *sql.Rows, collection *list.List) {
 		var book dao.Book
 		err := rows.Scan(&book.BookID, &book.BookName, &book.Author)
 		collection.PushBack(book)
-		return err
+		log.Fatal(err)
 	}
-	return executeReader("select book_id, book_name, book_author from tbl_book", reader)
+	return util.ExecuteReader(DbConnection, "select book_id, book_name, book_author from tbl_book", reader)
 }
 
 //Insert - Insert books to db
 func (repo BookRepo) Insert(doc interface{}) (int64, error) {
 	book := doc.(dao.Book)
-	return executeInsert("insert into tbl_book(book_name, book_author) values (?,?)", book.BookName, book.Author)
+	return util.ExecuteInsert(DbConnection, "insert into tbl_book(book_name, book_author) values (?,?)", book.BookName, book.Author)
 }
 
 //Update - Update books
 func (repo BookRepo) Update(doc interface{}) (int64, error) {
 	book := doc.(dao.Book)
-	return executeUpdateDelete("update tbl_book set book_name=?, book_author=? where book_id=?", book.BookName, book.Author, book.BookID)
+	return util.ExecuteUpdateDelete(DbConnection, "update tbl_book set book_name=?, book_author=? where book_id=?", book.BookName, book.Author, book.BookID)
 }
 
 //Remove - Delete books from db
 func (repo BookRepo) Remove(doc interface{}) (int64, error) {
 	book := doc.(dao.Book)
-	return executeUpdateDelete("delete from tbl_book where book_id=?", book.BookID)
+	return util.ExecuteUpdateDelete(DbConnection, "delete from tbl_book where book_id=?", book.BookID)
 }

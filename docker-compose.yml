@@ -9,6 +9,8 @@ services:
       dockerfile: go-crud-app.Dockerfile
     ports:
       - 8080:8080
+    environment:
+      GIN_MODE: release
     networks: 
       - go-crud-network
     depends_on:
