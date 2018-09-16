@@ -1,0 +1,41 @@
+version: '3.1'
+
+services:
+
+  web:
+    container_name: go-crud-api
+    build:
+      context: .
+      dockerfile: go-crud-app.Dockerfile
+    ports:
+      - 8080:8080
+    networks: 
+      - go-crud-network
+    depends_on:
+      - db
+    links:
+      - db
+
+  db:
+    container_name: go-crud-db
+    restart: always
+    networks:
+      - go-crud-network
+    build:
+      context: .
+      dockerfile: go-crud-db.Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: library
+      MYSQL_USER: developer
+      MYSQL_PASSWORD: 123
+    ports:
+      - 3307:3306
+    volumes:
+      - "db-data:/var/lib/mysql"
+
+volumes:
+  db-data:
+
+networks:
+  go-crud-network:

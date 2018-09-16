@@ -1,0 +1,7 @@
+{
+    "mysql-user": "developer",
+    "mysql-password": "123",
+    "db-name": "library",
+    "host": "localhost",
+    "port":3306
+  }

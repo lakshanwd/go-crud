@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/lakshanwd/muve-go/go-crud/repo"
-
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/lakshanwd/go-crud/handler"
+	"github.com/lakshanwd/go-crud/repository"
 )
 
 func main() {
 	fmt.Println("setup database connections")
-	if err := repo.SetupRepo(); err != nil {
+	if err := repository.SetupRepo(); err != nil {
 		log.Fatal(err)
 	}
-	defer repo.CloseRepo()
+	defer repository.CloseRepo()
 
 	fmt.Println("handling roures")
 	router := gin.Default()
